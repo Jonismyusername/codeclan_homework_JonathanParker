@@ -1,0 +1,68 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+#Question 1
+```{r}
+starbucks_menu <- read_csv("starbucks_drinkMenu_expanded.csv")
+```
+```{r}
+starbucks_menu
+```
+
+```{r}
+view(starbucks_menu)
+```
+```{r}
+str(starbucks_menu)
+```
+#Question 2
+```{r}
+starbucks_menu1 <- select(starbucks_menu, Beverage_category, Beverage, Beverage_prep, Calories)
+```
+
+#Question 3
+```{r}
+mutate(starbucks_menu1, calorie_diff = Calories - 135)
+```
+
+#Question 4
+```{r}
+select(starbucks_menu1, 1, 4) %>%
+group_by(Beverage_category) %>%
+  summarise(avg_calories = mean(Calories)) %>%
+  arrange(desc(avg_calories))
+```
+
+#Question 5
+```{r}
+select(starbucks_menu1, 3,4) %>% 
+  group_by(Beverage_prep) %>% 
+  summarise(avg_calories = mean(Calories)) %>% 
+  arrange(desc(avg_calories))
+```
+
+#  summarise(avg_calories_all = sum(avg_calories) / 13))
+
+#Question 6
+```{r}
+select(starbucks_menu1, 3,4) %>% 
+  group_by(Beverage_prep) %>% 
+  summarise(avg_calories = mean(Calories)) %>% 
+  arrange(desc(avg_calories)) %>% 
+  mutate(avg_calories_all = sum(avg_calories) / 13) %>%
+  filter(avg_calories > 134.2573) %>% 
+  select(Beverage_prep, avg_calories)
+```
+
+#Question 7
+```{r}
+select(starbucks_menu1, Beverage, Beverage_prep, Calories) %>%
+  arrange(Calories)
+```
+#Answer: Short Brewed Coffee!

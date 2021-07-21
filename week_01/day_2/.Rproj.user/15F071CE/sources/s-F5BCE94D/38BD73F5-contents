@@ -1,0 +1,221 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+tidyverse_logo()
+```
+
+```{r}
+tidyverse::tidyverse_logo()
+```
+
+```{r}
+library(CodeClanData)
+```
+
+```{r}
+all_deaths
+```
+
+```{r}
+select(all_deaths, name, gender)
+```
+
+```{r}
+select(all_deaths, -name, -gender)
+```
+
+```{r}
+deaths_no_names <- select(all_deaths, -name)
+```
+```{r}
+deaths_no_names
+```
+
+```{r}
+select(all_deaths, book1_GoT, book2_CoK, book3_SoS, book4_FfC, book5_DwD)
+```
+
+```{r}
+select(all_deaths, 9:13)
+```
+
+```{r}
+select(all_deaths, 5:13, -11)
+```
+
+```{r}
+library(beepr)
+```
+
+```{r}
+beep
+```
+
+```{r}
+beep(sound = 3)
+```
+```{r}
+beep(sound = 1)
+```
+```{r}
+beep(0)
+```
+```{r}
+beep(11)
+```
+```{r}
+beep(7)
+```
+
+
+```{r}
+filter(all_deaths, allegiances == "Lannister")
+```
+
+```{r}
+filter(all_deaths, allegiances %in% c("Lannister", "House Lannister"))
+```
+
+```{r}
+filter(all_deaths, year_of_death >= 299)
+```
+
+```{r}
+filter(all_deaths, year_of_death == "300")
+```
+
+```{r}
+filter(all_deaths, allegiances == "None")
+```
+
+```{r}
+filter(all_deaths, allegiances == "Lannister" & nobility == 1)
+```
+
+```{r}
+filter(all_deaths, allegiances == "Lannister" | allegiances == "Stark")
+```
+
+```{r}
+filter(all_deaths, allegiances %in% c("Lannister", "Stark"))
+```
+
+```{r}
+filter(all_deaths, !(allegiances %in% c("Lannister", "House Lannister")))
+```
+
+```{r}
+filter(all_deaths, book_intro_chapter > 5  & book_intro_chapter < 10)
+```
+
+```{r}
+filter(all_deaths, year_of_death <= 299)
+```
+
+```{r}
+filter(all_deaths, gender == 0 & !(allegiances %in% c("Lannister", "House Lannister")))
+```
+
+```{r}
+filter(all_deaths, name == c("Jon Snow", "Daenarys Targaryen", "Samwell Tarly"))
+```
+
+```{r}
+filter(all_deaths, name %in% c("Jon Snow", "Daenerys Targaryen", "Samwell Tarly"))
+```
+
+```{r}
+arrange(all_deaths, book_of_death)
+```
+
+```{r}
+arrange(all_deaths, name)
+```
+
+```{r}
+arrange(all_deaths,)
+```
+
+```{r}
+arrange(all_deaths, book_of_death, desc(death_chapter), allegiances)
+```
+
+```{r}
+arrange(all_deaths, allegiances)
+```
+
+```{r}
+arrange(all_deaths, allegiances, book_intro_chapter)
+```
+
+```{r}
+arrange(all_deaths, desc(year_of_death))
+```
+
+```{r}
+mutate(all_deaths, years_survived = year_of_death - 298)
+```
+
+```{r}
+mutate(all_deaths, book_of_deaths = book_of_death*5)
+```
+
+```{r}
+mutate(all_deaths, is_alive = is.na(year_of_death))
+```
+
+```{r}
+mutate(all_deaths, book_of_death = as.integer(book_of_death))
+```
+
+```{r}
+mutate(all_deaths, name = as.numeric(name))
+```
+
+```{r}
+mutate(all_deaths, new_column = as.logical(is.na(book_intro_chapter)))
+```
+
+```{r}
+summarise(deaths_grouped, n_males = sum(gender))
+```
+
+```{r}
+summarise(all_deaths, avg_year_death = mean(year_of_death))
+```
+
+```{r}
+summarise(deaths_grouped, avg_year_death = mean(year_of_death, na.rm = TRUE))
+```
+
+```{r}
+summarise(deaths_grouped, n_characters = n())
+```
+
+
+```{r}
+deaths_grouped <- group_by(all_deaths, allegiances)
+```
+
+```{r}
+deaths_grouped2 <- group_by(all_deaths, gender, nobility)
+summarise(deaths_grouped2, n_characters = n())
+```
+
+```{r}
+deaths_nw <- filter(all_deaths, allegiances == "Night's Watch")
+summarise(deaths_nw, n_males = sum(gender))
+```
+
+```{r}
+died <- filter(all_deaths, !is.na(year_of_death))
+group_by(died, allegiance)
+```
+
