@@ -1,0 +1,70 @@
+---
+title: "7_homework_cleaning_data"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+```{r}
+library(janitor)
+```
+```{r}
+movies <- read_csv("data/movies.csv")
+```
+```{r}
+view(movies)
+```
+```{r}
+str(movies)
+```
+```{r}
+head(movies)
+```
+
+#Question01
+
+#Question02
+```{r}
+movies_selected <- select(movies, title, runtime, budget)
+```
+
+#Question03
+```{r}
+
+```
+
+#Question04
+```{r}
+movies_selected %>% 
+  mutate(runtime = na_if(runtime, "0")) %>% 
+  filter(is.na(runtime))
+```
+#Question05
+```{r}
+movies_imputed <- movies_selected %>% 
+  mutate(runtime = coalesce(runtime, median(runtime, na.rm = TRUE))) %>% 
+filter(!is.na(runtime))
+
+```
+
+#Question06
+```{r}
+movies_imputed %>% 
+  #slice_min(runtime, n = 10)
+slice_max(runtime, n = 10)
+```
+
+
+#Question07
+```{r}
+
+movies_imputed <- movies_imputed %>% 
+  mutate(budget, if_else(budget < 100000000, median(budget), budget))
+  
+```
+
+```{r}
+movies_imputed
+```
+
