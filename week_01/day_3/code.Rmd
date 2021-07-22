@@ -68,3 +68,26 @@ movies_imputed <- movies_imputed %>%
 movies_imputed
 ```
 
+#Extension_Question01
+
+```{r}
+movie_budgets <- movies_imputed %>% 
+  select(budget) %>% 
+  mutate(budget_type = case_when(
+    budget < 12000000 ~ "Small budget",
+    budget >= 12000000 & budget < 40000000 ~ "Medium budget", 
+      budget >= 40000000 ~ "Big budget",
+    TRUE ~ "Other"
+  ))
+  
+  
+  # students_big %>% 
+  # select(ageyears) %>% 
+  # mutate(age_divisable = case_when(
+  #   ageyears %% 2 == 0 ~ "Even",
+  #   ageyears %% 3 == 0 ~ "Divisable by 3",
+  #   ageyears %% 5 == 0 ~ "Divisable by 5",
+  #   TRUE ~ "Other number"
+  # ))
+```
+
