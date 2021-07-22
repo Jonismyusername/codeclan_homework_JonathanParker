@@ -23,8 +23,17 @@ str(starbucks_menu)
 ```
 #Question 2
 ```{r}
-starbucks_menu1 <- select(starbucks_menu, Beverage_category, Beverage, Beverage_prep, Calories)
+starbucks_menu1 <- select(starbucks_menu, Beverage_category, Beverage, Beverage_prep, Calories) 
 ```
+#Question 2 - answer
+```{r}
+starbucks_menu %>% 
+  select(Beverage_category, Beverage, Beverage_prep, Calories) %>% 
+  filter(is.na(Calories)) %>% 
+  summarise
+```
+
+
 
 #Question 3
 ```{r}
@@ -36,14 +45,16 @@ mutate(starbucks_menu1, calorie_diff = Calories - 135)
 select(starbucks_menu1, 1, 4) %>%
 group_by(Beverage_category) %>%
   summarise(avg_calories = mean(Calories)) %>%
-  arrange(desc(avg_calories))
+  arrange(desc(avg_calories)) %>% 
+  head(3)
+# tail(3)
 ```
 
 #Question 5
 ```{r}
-select(starbucks_menu1, 3,4) %>% 
-  group_by(Beverage_prep) %>% 
-  summarise(avg_calories = mean(Calories)) %>% 
+select(starbucks_menu1, 3,4) %>%
+  group_by(Beverage_prep) %>%
+  summarise(avg_calories = mean(Calories)) %>%
   arrange(desc(avg_calories))
 ```
 
