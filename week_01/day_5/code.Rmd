@@ -55,9 +55,9 @@ books %>%
 
 # Top rated author with more than average number of ratings.
 books %>% 
-  select(authors, 
-         average_rating, 
-         ratings_count) %>% 
+  # select(authors, 
+  #        average_rating, 
+  #        ratings_count) %>% 
   group_by(authors) %>% 
   mutate(average_author_rating = mean(average_rating),
          total_ratings = sum(ratings_count)) %>%
@@ -69,6 +69,16 @@ books %>%
   # authors with fewer than the average number of ratings.
   select(authors, average_author_rating, total_ratings) %>% 
     arrange(desc(average_author_rating)) 
+
+books %>%
+  group_by(authors) %>% 
+  mutate(average_author_rating = mean(average_rating),
+         total_ratings = sum(ratings_count)) %>%
+  ungroup() %>% 
+  filter(total_ratings > mean(ratings_count)) %>%
+   select(authors, average_author_rating, total_ratings) %>% 
+    arrange(desc(average_author_rating)) %>% 
+  distinct()
 
 ```
 
