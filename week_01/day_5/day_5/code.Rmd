@@ -1,0 +1,75 @@
+---
+title: "Weekend Homework (week_01)"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(janitor)
+books <- read_csv("data/books.csv")
+view(books)
+glimpse(books)
+```
+
+```{r}
+# Investigate missing values.
+
+books %>% 
+filter(is.na(across(1:13))) %>% 
+summarise(count = sum(is.na(1:13)))
+
+```
+```{r}
+
+# 6,639 distinct authors
+books %>% 
+  distinct(authors) %>% 
+  summarise(distinct_authors = n())
+
+# Average rating given = 3.93
+all_titles_average_rating <- books %>% 
+  mutate(average_rating_all = sum(average_rating) / 11123) %>% 
+  summarise(average_rating_all)
+
+# Top 10 authors by number of titles.
+top_ten_by_volume <- books %>% 
+  group_by(authors) %>% 
+  summarise(count_of_titles = n()) %>% 
+  arrange(desc(count_of_titles)) %>% 
+  head(10) %>% 
+  ungroup()
+
+# Top authors by average author rating.
+books %>% 
+  group_by(authors) %>% 
+  mutate(average_author_rating = mean(average_rating)) %>% 
+  select(title, 
+         authors, 
+         average_rating, 
+         average_author_rating,
+         ratings_count) %>% 
+  arrange(desc(average_author_rating)) %>% 
+  select(authors, average_author_rating, ratings_count) %>% 
+  head(10) %>% 
+  ungroup()
+
+# Top rated author with more than average number of ratings.
+books %>% 
+  select(authors, 
+         average_rating, 
+         ratings_count) %>% 
+  group_by(authors) %>% 
+  mutate(average_author_rating = mean(average_rating),
+         total_ratings = sum(ratings_count)) %>%
+  # ^ calculates the average rating for each other and the total number of 
+  # ratings they have received.
+  ungroup() %>% 
+  filter(total_ratings > mean(ratings_count)) %>% 
+  # ungroup() to find average ratings_count for whole dataset; filter to remove
+  # authors with fewer than the average number of ratings.
+  select(authors, average_author_rating, total_ratings) %>% 
+    arrange(desc(average_author_rating)) 
+
+```
+
+

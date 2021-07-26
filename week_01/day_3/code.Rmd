@@ -31,6 +31,8 @@ movies_selected <- select(movies, title, runtime, budget)
 
 #Question03
 ```{r}
+#Not answered
+
 
 ```
 
@@ -80,6 +82,7 @@ movie_budgets <- movies_imputed %>%
     TRUE ~ "Other"
   ))
   
+movie_budgets
   
   # students_big %>% 
   # select(ageyears) %>% 
