@@ -54,6 +54,7 @@ tweets %>%
   arrange(desc(total_likes)) %>% 
   select(media_type, total_likes) %>% 
   distinct()
+
 ```
 
 
@@ -112,6 +113,12 @@ codeclan_hashtags %>%
   select(hashtags) %>% 
   str_detect(pattern)
 
+# codeclan_all %>%
+#   filter(str_detect(hashtags, "^c\\("))
+
+# codeclan_all %>%
+#   filter(str_detect(hashtags, "^c\\(\"")) %>%
+#   select(hashtags)
 
 ```
 
@@ -128,6 +135,11 @@ edinburgh_tweets <- tweets %>%
   select(text) %>% 
   str_detect(pattern) %>% 
   str_extract_all(pattern)
+
+# ANSWER
+tweets %>% 
+  filter(str_detect(text, "(?i)edinburgh")) %>% 
+  summarise(text, count=n())
 ```
 
 
@@ -139,5 +151,17 @@ edinburgh_tweets <- tweets %>%
 # Hint
 # Think about all the different characters which could be in a Twitter username, do a bit of online research
 
+# ANSWER
+mentions_data <- tweets %>%
+  mutate(mentions = str_extract_all(text, "@[A-Za-z0-9_]+")) %>%
+  select(tweet_id, mentions)
+
+mentions_data$mentions
+
+# OTHER ANSWER
+user_pattern <- "@[a-zA-Z0-9_]+"
+tweets <- tweets %>% 
+  select(text)
+head(str_extract_all(tweets$text, user_pattern))
 ```
 
