@@ -164,8 +164,9 @@ SELECT
 	first_name,
 	last_name,
 	department,
-CONCAT(first_name, ' ', last_name, ' - ', department) AS badge_label
-FROM employees;
+	CONCAT(first_name, ' ', last_name, ' - ', department) AS badge_label
+FROM employees
+WHERE (first_name IS NOT NULL) AND (last_name IS NOT NULL) AND (department IS NOT NULL);
 
 /*
 Question 17.
@@ -180,9 +181,20 @@ SELECT
 	last_name,
 	department,
 	start_date,
-CONCAT(first_name, ' ', last_name, ' - ', department, ' (joined ', to_char(start_date, 'FMMonth'), ' ', extract(YEAR FROM start_date), 
-')') AS badge_label
-FROM employees;
+CONCAT(first_name, ' ', last_name, ' - ', department,
+' (joined ', TO_CHAR(start_date, 'FMMonth'), ' ', 
+EXTRACT(YEAR FROM start_date), ')') AS badge_label
+FROM employees
+WHERE (first_name IS NOT NULL) 
+AND (last_name IS NOT NULL) 
+AND (department IS NOT NULL) 
+AND (start_date IS NOT NULL);
+
+/* ALTERNATIVE
+CONCAT(first_name, ' ', last_name, ' - ', department,
+' (joined ', RTRIM(TO_CHAR(start_date, 'Month')), ' ', 
+EXTRACT(YEAR FROM start_date), ')') AS badge_label
+*/
 
 /*
 Question 18.
@@ -193,5 +205,8 @@ SELECT
 	first_name,
 	last_name,
 	salary,
-CONCAT(CASE WHEN salary < 40000 THEN 'Low' ELSE 'High' END) AS salary_class
+CONCAT(CASE WHEN salary < 40000 
+THEN 'Low' 
+ELSE 'High' 
+END) AS salary_class
 FROM employees;
