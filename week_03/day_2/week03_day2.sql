@@ -163,3 +163,40 @@ ON e.team_id = t.id
 GROUP BY t.id;
 
 -- 4c
+
+
+/*
+2 Extension
+*/
+
+/*
+Question 5.
+How many of the employees serve on one or more committees?
+
+
+Hints
+All of the details of membership of committees is held in a single table: employees_committees, so this doesn’t require a join.
+
+Some employees may serve in multiple committees. Can you find the number of distinct employees who serve? 
+[Extra hint - do some research on the DISTINCT() function].
+*/
+
+SELECT *
+FROM employees_committees
+
+
+
+
+
+
+
+/*
+Question 6.
+How many of the employees do not serve on a committee?
+
+
+Hints
+This requires joining over only two tables
+
+Could you use a join and find rows without a match in the join?
+*/
