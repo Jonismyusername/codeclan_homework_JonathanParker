@@ -168,36 +168,16 @@ charge_cost is in teams, while salary and fte_hours are in employees, so a join 
 You will need to change the type of charge_cost in order to perform the calculation
 */
 
+------ ANSWER -------
 SELECT
-	e.*,
-	t.*,
-	CAST(t.charge_cost AS NUMERIC) AS charge_cost,
-	SUM((((48 * 35) * charge_cost) - salary) * fte_hours) AS expected_profit
-FROM employees AS e INNER JOIN teams AS t
-ON e.team_id = t.id;
+	*,
+	(48*35*t.charge_cost::INT - e.salary) * fte_hours AS expected_profit
+FROM
+	employees AS e
+	LEFT JOIN teams AS t
+	ON e.team_id = t.id;
+------ ANSWER -------
 
-SELECT
-	e.*,
-	CAST(t.charge_cost AS NUMERIC) AS charge_cost
-FROM employees AS e INNER JOIN teams AS t
-ON e.team_id = t.id;
-
--------
-WITH charge_cost AS (
-SELECT
-	e.*,
-	t.*,
-	CAST(t.charge_cost AS NUMERIC) AS charge_cost_num
-FROM employees AS e LEFT JOIN teams AS t
-ON e.team_id = t.id
-)
-SELECT
-	e.*,
-	t.*,
-	SUM(((48 * 35 * charge_cost_num) - salary) * fte_hours)
-FROM employees AS e INNER JOIN teams AS t
-ON e.team_id = t.id;
--------
 
 /*
 Question 13. [Tough]
@@ -222,7 +202,7 @@ FROM employees
 GROUP BY fte_hours
 ORDER BY COUNT(*)
 LIMIT 1;
-------
+------ ANSWER
 SELECT
 	first_name,
 	last_name,
@@ -265,33 +245,64 @@ ORDER BY COUNT(*) DESC, department;
 /*
 Question 15. [Bit tougher]
 Return a table of those employee first_names shared by more than one employee, together with a count of the number of times each 
-first_name occurs. Omit employees without a stored first_name from the table. Order the table descending by count, and then alphabetically 
-by first_name.
+first_name occurs. 
+Omit employees without a stored first_name from the table. 
+Order the table descending by count, and then alphabetically by first_name.
 */
 
-
+SELECT
+	first_name,
+	COUNT(*)
+FROM employees
+WHERE first_name IS NOT NULL
+GROUP BY first_name
+HAVING COUNT(*) > 1
+ORDER BY COUNT(*) DESC, first_name;
 
 
 /*
 Question 16. [Tough]
 Find the proportion of employees in each department who are grade 1.
-Hints
-Think of the desired proportion for a given department as the number of employees in that department who are grade 1, divided by the total number of employees in that department.
 
+Hints
+Think of the desired proportion for a given department as the number of employees in that department who are grade 1, divided by the 
+total number of employees in that department.
 
 You can write an expression in a SELECT statement, e.g. grade = 1. This would result in BOOLEAN values.
 
-
 If you could convert BOOLEAN to INTEGER 1 and 0, you could sum them. The CAST() function lets you convert data types.
 
-
-In SQL, an INTEGER divided by an INTEGER yields an INTEGER. To get a REAL value, you need to convert the top, bottom or both sides of the division to REAL.
+In SQL, an INTEGER divided by an INTEGER yields an INTEGER. To get a REAL value, you need to convert the top, bottom or both sides of 
+the division to REAL.
 */
 
+------ ANSWER ------
+WITH depart_g1 AS (
+SELECT 
+	department,
+	COUNT(id) AS employ_g1
+FROM employees
+WHERE grade = 1
+GROUP BY department
+)
+SELECT 
+	employees.department,
+	COUNT(employees.id) AS employ_all,
+	depart_g1.employ_g1,
+	depart_g1.employ_g1::FLOAT/COUNT(employees.id) 
+FROM employees
+LEFT JOIN depart_g1 
+ON employees.department = depart_g1.department
+GROUP BY employees.department, depart_g1.employ_g1
+------ ANSWER ------
 
-
-
-
+------ ALTERNATIVE ANSWER ------
+SELECT
+	department,
+	COUNT(CASE WHEN grade = 1 THEN 1 END)::REAL/count(*)::REAL AS prop_grade_1
+FROM employees
+GROUP BY department;
+------ ALTERNATIVE ANSWER ------
 
 
 /*
@@ -307,13 +318,13 @@ Note that some of these questions may be best answered using CTEs or window func
 notes!
 */
 
-
 /*
 Question 1. [Tough]
 Get a list of the id, first_name, last_name, department, salary and fte_hours of employees in the largest department. 
 Add two extra columns showing the ratio of each employee’s salary to that department’s average salary, and each employee’s fte_hours to that 
 department’s average fte_hours.
 */
+
 
 
 /*
@@ -330,26 +341,75 @@ Another solution might involve combining a subquery with window functions
 /*
 Question 2.
 Have a look again at your table for MVP question 8. It will likely contain a blank cell for the row relating to employees with ‘unknown’ 
-pension enrollment status. This is ambiguous: it would be better if this cell contained ‘unknown’ or something similar. Can you find a way to do this, perhaps using a combination of COALESCE() and CAST(), or a CASE statement?
+pension enrollment status. This is ambiguous: it would be better if this cell contained ‘unknown’ or something similar. Can you find a way 
+to do this, perhaps using a combination of COALESCE() and CAST(), or a CASE statement?
 
 Hints
-COALESCE() lets you substitute a chosen value for NULLs in a column, e.g. COALESCE(text_column, 'unknown') would substitute 'unknown' for every NULL in text_column. The substituted value has to match the data type of the column otherwise PostgreSQL will return an error.
+COALESCE() lets you substitute a chosen value for NULLs in a column, e.g. COALESCE(text_column, 'unknown') would substitute 'unknown' for 
+every NULL in text_column. The substituted value has to match the data type of the column otherwise PostgreSQL will return an error.
 
-CAST() let’s you change the data type of a column, e.g. CAST(boolean_column AS VARCHAR) will turn TRUE values in boolean_column into text 'true', FALSE to text 'false', and will leave NULLs as NULL
+CAST() let’s you change the data type of a column, e.g. CAST(boolean_column AS VARCHAR) will turn TRUE values in boolean_column into text 'true', 
+FALSE to text 'false', and will leave NULLs as NULL
 */
 
+SELECT
+	COALESCE(pension_enrol::VARCHAR, 'unknown') AS pension_enrol,
+	COUNT(*) AS no_employees
+FROM employees
+GROUP BY pension_enrol;
 
 /*
-Question 3. Find the first name, last name, email address and start date of all the employees who are members of the ‘Equality and Diversity’ committee. Order the member employees by their length of service in the company, longest first.
+Question 3. Find the first name, last name, email address and start date of all the employees who are members of the ‘Equality and Diversity’ 
+committee. Order the member employees by their length of service in the company, longest first.
 */
 
+
+SELECT
+	e.first_name,
+	e.last_name,
+	e.email,
+	e.start_date,
+	c.name
+FROM (employees AS e LEFT JOIN employees_committees AS ec
+ON e.id = ec.employee_id)
+INNER JOIN committees AS c
+ON ec.committee_id = c.id
+WHERE c.name = 'Equality and Diversity'
+ORDER BY start_date NULLS LAST;
 
 /*
 Question 4. [Tough!]
-Use a CASE() operator to group employees who are members of committees into salary_class of 'low' (salary < 40000) or 'high' (salary >= 40000). A NULL salary should lead to 'none' in salary_class. Count the number of committee members in each salary_class.
+Use a CASE() operator to group employees who are members of committees into salary_class of 'low' (salary < 40000) or 
+'high' (salary >= 40000). A NULL salary should lead to 'none' in salary_class. Count the number of committee members in each salary_class.
 
 Hints
 You likely want to count DISTINCT() employees in each salary_class
 
 You will need to GROUP BY salary_class
 */
+
+-- Find employees who are members of committees
+-- Group into salary_class of 'low' and 'high' (NULL = 'none')
+-- Count the number of staff in each class
+
+SELECT
+	CASE WHEN salary < 40000 
+	THEN 'Low' 
+		WHEN salary > 40000
+		THEN 'High'
+	ELSE 'None'
+	END AS salary_class,
+	COUNT(*) AS no_employees
+FROM (employees AS e LEFT JOIN employees_committees AS ec
+ON e.id = ec.employee_id)
+INNER JOIN committees AS c
+ON ec.committee_id = c.id
+GROUP BY salary_class;
+
+
+
+
+
+
+
+
