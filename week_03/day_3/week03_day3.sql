@@ -67,7 +67,7 @@ SELECT
 	COUNT(id) AS no_employees
 FROM employees
 GROUP BY department, fte_hours
-ORDER BY fte_hours;
+ORDER BY department, fte_hours;
 
 
 /*
@@ -125,8 +125,17 @@ SELECT
 	salary,
 	SUM(fte_hours * salary) AS effective_yearly_salary
 FROM employees
-WHERE (fte_hours * salary) > 30000
-GROUP BY first_name, last_name, fte_hours, salary;
+WHERE (fte_hours * salary) > 30000;
+
+----- ANSWER -----
+SELECT 
+  first_name,
+  last_name,
+  fte_hours,
+  salary,
+  fte_hours * salary AS effective_yearly_salary
+FROM employees
+WHERE fte_hours * salary > 30000;
 
 /*
 Question 10
@@ -135,9 +144,9 @@ Hint
 is a field in table `teams
 */
 
-SELECT
-	e.*,
-	t.*
+SELECT *
+--	e.*,
+--	t.*
 FROM employees AS e INNER JOIN teams AS t
 ON e.team_id = t.id
 WHERE t.name = 'Data Team 1';
@@ -325,7 +334,27 @@ Add two extra columns showing the ratio of each employee’s salary to that depa
 department’s average fte_hours.
 */
 
+----- ANSWER: CTE -----
 
+WITH biggest_dept_details AS (
+SELECT
+	department,
+	AVG(salary) AS avg_salary,
+	AVG(fte_hours) AS avg_fte,
+	COUNT(id) AS count_employees
+FROM employees
+GROUP BY department
+ORDER BY count_employees DESC
+LIMIT 1
+)
+SELECT
+	*,
+	e.salary / bd.avg_salary AS salary_over_avg
+FROM
+	employees AS e
+INNER JOIN
+	biggest_dept_details as bd
+ON e.department = bd.department;
 
 /*
 [Extension - really tough! - how could you generalise your query to be able to handle the fact that two or more departments may be tied in their 
@@ -337,6 +366,36 @@ Writing a CTE to calculate the name, average salary and average fte_hours of the
 Another solution might involve combining a subquery with window functions
 */
 
+WITH dept_details AS (
+SELECT
+	department,
+	AVG(salary) AS avg_salary,
+	AVG(fte_hours) AS avg_fte,
+	COUNT(id) AS count_employees
+FROM employees
+GROUP BY department
+ORDER BY count_employees DESC
+LIMIT 1
+),
+biggest_employee_count AS (
+SELECT
+	MAX(count_employees) AS max_count_employee
+FROM dept_details
+),
+biggest_dept_details AS (
+SELECT *
+FROM dept_details
+INNER JOIN biggest_employee_count
+ON dept_details.count_employees = biggest_employee_count.max_count_employee
+)
+SELECT
+	*,
+	e.salary / bd.avg_salary AS salary_over_avg
+FROM
+	employees AS e
+INNER JOIN
+	dept_details as bd
+ON e.department = bd.department;
 
 /*
 Question 2.
@@ -402,6 +461,22 @@ SELECT
 	COUNT(*) AS no_employees
 FROM (employees AS e LEFT JOIN employees_committees AS ec
 ON e.id = ec.employee_id)
+INNER JOIN committees AS c
+ON ec.committee_id = c.id
+GROUP BY salary_class;
+
+----- ANSWER -----
+----- DISTINCT() is needed because one person can be in more than one committee -----
+
+SELECT 
+  CASE 
+    WHEN e.salary < 40000 THEN 'low'
+    WHEN e.salary IS NULL THEN 'none'
+    ELSE 'high' 
+  END AS salary_class,
+  COUNT(DISTINCT(e.id)) AS num_committee_members
+FROM employees AS e INNER JOIN employees_committees AS ec
+ON e.id = ec.employee_id
 INNER JOIN committees AS c
 ON ec.committee_id = c.id
 GROUP BY salary_class;
