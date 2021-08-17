@@ -124,9 +124,58 @@ ggplot(qb_device_data) +
 # 
 # col_scheme <- c("#E89FE9", "#50434F", "#B6A7B5", "#F9A472", "#BD7040")
 
+```
+
+```{r}
+kwikbit_theme <- function() {
+  theme(
+    panel.background = element_rect(fill = "white"),
+    panel.grid = element_line(colour = "#E89FE9", linetype = 3, size = 0.5),
+    title = element_text(colour = "#50434F", size = 14),
+    legend.title = element_text(colour = "#50434F", size = 12),
+    legend.text = element_text(colour = "#50434F", size = 10),
+    axis.title = element_text(colour = "#50434F", size = 10)
+  )
+}
+
+```
+
+
+```{r}
+
 ggplot(qb_revenue_breakdown) +
   aes(x = Year, y = Revenue, fill = Product) +
-  geom_bar(stat = "identity")
+  geom_bar(stat = "identity") +
+    scale_fill_manual(
+    values = c("#E89FE9", "#50434F", "#B6A7B5", "#F9A472", "#BD7040")
+    ) +
+  labs(
+    title = "Yearly revenue by product\n"
+  )
+```
+
+```{r}
+qb_monthly_sales %>% 
+  filter(Cashflow == "Kwikbit Unit 1 Sales") %>% 
+  ggplot() +
+  geom_line(aes(x = Date, y = Amount), 
+            colour = "#F9A472") +
+  labs(
+    title = "Kwikbit Unit 1 Sales, 2018/19\n"
+  )
+```
+
+```{r}
+
+qb_monthly_sales %>% 
+    filter(Cashflow != "Kwikbit Unit 1 Sales") %>% 
+ggplot() +
+  aes(x = Date, y = Amount, group = Cashflow, colour = Cashflow) +
+  geom_line() +
+  labs(
+    x = "\nDate"
+  ) +
+  kwikbit_theme()
 
 ```
 
