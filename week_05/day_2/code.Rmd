@@ -103,10 +103,16 @@ backpack %>%
   mutate(back_problems = as.logical(back_problems)) %>% 
 ggplot() +
   aes(x = "", y = "", fill = back_problems) +
-  geom_col(position = "fill") +
+  geom_col(position = "stack") +
   coord_polar("y", start = 0) +
   facet_grid(~ sex)
-  
+
+backpack %>% 
+  mutate(back_problems = as.logical(back_problems)) %>% 
+ggplot() +
+  aes(x = back_problems, fill = back_problems) +
+  geom_bar() +
+  theme(legend.position = "none")
   
 # Summary
 #
@@ -137,5 +143,31 @@ ggplot() +
 
 # Summary
 #
+```
+
+```{r}
+backpack_sex <- backpack %>% 
+  mutate (back_problems = recode (back_problems, `1` = "Yes",
+                                                 `0` = "No")) %>% 
+  group_by(sex, back_problems) %>%           
+  summarise(count = n(), .groups = "drop") %>% 
+  ungroup ()
+
+help(package = 'forcats')
+
+backpack_sex %>%   
+  mutate(
+    sex = factor(sex, levels = rev(unique(sex))),
+    back_problems = factor(back_problems, levels = c('Yes', 'No'))
+  ) %>% 
+  # ^ Changing order of elements
+ggplot +
+  aes(x = sex, y = count, fill = back_problems) +
+  geom_col(position = "fill") +
+  ggtitle("Representation of backpain based on gender" ) +
+  labs(x = "Gender",
+       y = "Count") +
+ scale_fill_brewer(palette = "Dark2") +
+ theme_bw() 
 ```
 
