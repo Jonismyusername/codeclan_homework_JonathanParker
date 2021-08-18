@@ -1,0 +1,141 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+library(CodeClanData)
+```
+
+```{r}
+# 2 MVP
+# 
+# 
+# Question 1.
+# 
+# Load in the libraries you need, and look at the backpack data. Take note of variable names and dimensions.
+#
+
+view(backpack)
+names(backpack)
+dim(backpack)
+```
+
+
+```{r}
+# Question 2.
+# 
+# What is the distribution of backpack weights that students are carrying? Choose an appropriate graph to show the distribution.
+#
+
+ggplot(backpack) +
+  aes(x = backpack_weight) +
+  geom_histogram(binwidth = 5, col = "white") 
+
+# Summary
+# The chart shows that the vast majority of backpacks fall within the weight range 10-15.
+```
+
+
+```{r}
+# Question 3.
+# 
+# Are there differences in backpack weight between sex?
+#
+
+ggplot(backpack) +
+  aes(x = backpack_weight, y = sex) +
+  geom_point()
+
+# Summary
+# No discernible differences in backpack weight between sex, with the exception
+# one outlying male value (35).
+```
+
+
+```{r}
+# Question 4.
+# 
+# What is the relationship between body weight and backpack weight?
+#
+
+ggplot(backpack) +
+  aes(x = backpack_weight, y = body_weight) +
+  geom_point() +
+  geom_smooth() +
+  scale_x_continuous(limits = c(0,30))
+
+# Summary
+# There is a weak positive correlation between backpack weight and body weight.
+# Removing the outlying value for backpack weight (35) weakens this correlation
+# further.
+```
+
+
+```{r}
+# Question 5.
+# 
+# Is this relationship different between men and women? Choose an appropriate plot and interpret your findings.
+#
+
+
+ggplot(backpack) +
+  aes(x = backpack_weight, y = body_weight) +
+  geom_point() +
+  geom_smooth() +
+  facet_grid(~ sex)
+
+# Summary
+# The weak positive correlation applies to both male and female students.
+```
+
+
+```{r}
+# Question 6.
+# 
+# What proportion of students report back pain?
+#
+
+backpack %>% 
+  mutate(back_problems = as.logical(back_problems)) %>% 
+ggplot() +
+  aes(x = "", y = "", fill = back_problems) +
+  geom_col(position = "fill") +
+  coord_polar("y", start = 0) +
+  facet_grid(~ sex)
+  
+  
+# Summary
+#
+```
+
+
+```{r}
+# Question 7.
+# 
+# Is this proportion different between men and women?
+#
+
+
+
+# Summary
+#
+```
+
+
+```{r}
+# Question 8.
+# 
+# Now you’ve investigated your data separately, create plots to describe the relationship between backpack weight, body weight, gender and reported backpain.
+# 
+# Try both backpack_weight and body_weight as well as the ratio.
+# 
+# Hint: faceting would be useful here.
+
+# Summary
+#
+```
+

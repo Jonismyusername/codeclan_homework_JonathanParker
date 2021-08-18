@@ -73,6 +73,11 @@ ggplot(qb_competitors) +
   aes(x = Revenue, y = Company, group = Company, fill = Company) +
   geom_area(stat = "identity")
 
+# ANSWER
+ggplot(qb_competitors) +
+  aes(x = Year, y = Revenue, fill = Company) +
+  geom_area()
+
 ```
 
 
@@ -85,6 +90,8 @@ ggplot(qb_competitors) +
   aes(x = Year, y = Revenue, colour = Company) +
   geom_line(aes(group = Company)) +
   geom_point()
+
+
 
 ```
 
@@ -105,6 +112,16 @@ ggplot(qb_device_data) +
   aes(x = hours, y = counts, colour = device) +
   geom_line(aes(group = device)) +
   facet_wrap(~id)
+
+# ANSWER
+qb_device_data <- 
+mutate(qb_device_data, decimal_hour = hours + (mins/60))
+
+ggplot(qb_device_data) +
+  aes(x = decimal_hour, y = counts) +
+  geom_line() + 
+  facet_grid(id ~ device)
+
 ```
 
 ```{r}
@@ -127,6 +144,18 @@ ggplot(qb_device_data) +
 ```
 
 ```{r}
+
+# Generally colour schemes are kept separate from themes. 
+# scale_fill_manual (for bars) and scale_colour_manual (for lines) can be used 
+# to apply colour schemes:
+# e.g. 
+#   ggplot(qb_revenue_breakdown) +
+#   aes(x = Year, y = Revenue, fill = Product) +
+#   geom_col() +
+#   scale_fill_manual(values = col_scheme)
+
+col_scheme <- c("#E89FE9", "#50434F", "#B6A7B5", "#F9A472", "#BD7040")
+
 kwikbit_theme <- function() {
   theme(
     panel.background = element_rect(fill = "white"),
@@ -137,6 +166,16 @@ kwikbit_theme <- function() {
     axis.title = element_text(colour = "#50434F", size = 10)
   )
 }
+
+# ANSWER
+theme_qb <- 
+  theme(
+    text = element_text(size = 12),
+    title = element_text(size = 14),
+    axis.text = element_text(size = 10),
+    panel.background = element_rect(fill = "white"),
+    panel.grid = element_line(colour = "grey90", linetype = "dashed")
+  )
 
 ```
 
@@ -151,7 +190,8 @@ ggplot(qb_revenue_breakdown) +
     ) +
   labs(
     title = "Yearly revenue by product\n"
-  )
+  ) +
+  kwikbit_theme()
 ```
 
 ```{r}
@@ -162,7 +202,8 @@ qb_monthly_sales %>%
             colour = "#F9A472") +
   labs(
     title = "Kwikbit Unit 1 Sales, 2018/19\n"
-  )
+  ) +
+  kwikbit_theme()
 ```
 
 ```{r}
