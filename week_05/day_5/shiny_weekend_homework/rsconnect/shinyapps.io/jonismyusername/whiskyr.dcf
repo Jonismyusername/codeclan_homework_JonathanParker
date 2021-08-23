@@ -1,0 +1,13 @@
+name: whiskyr
+title: whiskyr
+username:
+account: jonismyusername
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4523391
+bundleId: 4952876
+url: https://jonismyusername.shinyapps.io/whiskyr/
+when: 1629709821.50244
+lastSyncTime: 1629709821.50245
+asMultiple: FALSE
+asStatic: FALSE
