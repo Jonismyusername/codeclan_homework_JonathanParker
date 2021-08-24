@@ -1,0 +1,247 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r}
+library(gtools)
+library(prob)
+library(tidyverse)
+```
+```{r}
+titanic <- read_csv("data/titanic.csv")
+```
+MVP
+1.1
+
+A data set detailing the survival or death of passengers and crew members on the RMS Titanic is given in the data folder for this homework - use this data and not the built-in Titanic dataset in R.
+
+Some time after the disaster a journalist wrote that crew members were more likely to have survived the sinking than passengers. This was disputed by a descendant of one of the surviving crew members, who suggested that the opposite was true, i.e. passengers were more likely to have survived than crew.
+
+Question
+Calculate the conditional probabilities prob(survived∣crew) and prob(survived∣passenger)
+to settle this dispute.
+
+Have a look at the distinct values of the class variable, this will tell you whether each individual was a passenger (1st, 2nd or 3rd class) or a member of the crew (treat restaurant staff as crew)
+
+```{r}
+titanic %>% 
+  distinct(class)
+
+passenger <- c("1st", "2nd", "3rd")
+
+passengers_survived <- titanic %>% 
+  mutate(passenger = if_else(class %in% passenger, TRUE, FALSE)) %>% 
+  filter(survived == "yes",
+         passenger == TRUE) %>% 
+  group_by(passenger) %>% 
+  summarise(count = n()) %>% 
+  pull()
+
+passengers_died <- titanic %>% 
+  mutate(passenger = if_else(class %in% passenger, TRUE, FALSE)) %>% 
+  filter(survived == "no",
+         passenger == TRUE) %>% 
+  group_by(passenger) %>% 
+  summarise(count = n()) %>% 
+  pull()
+
+crew_survived <- titanic %>% 
+  mutate(passenger = if_else(class %in% passenger, TRUE, FALSE)) %>% 
+  filter(survived == "yes",
+         passenger == FALSE) %>% 
+  group_by(passenger) %>% 
+  summarise(count = n()) %>% 
+  pull()
+
+crew_died <- titanic %>% 
+  mutate(passenger = if_else(class %in% passenger, TRUE, FALSE)) %>% 
+  filter(survived == "no",
+         passenger == FALSE) %>% 
+  group_by(passenger) %>% 
+  summarise(count = n()) %>% 
+  pull()
+
+total_passengers <- passengers_survived + passengers_died
+total_crew <- crew_survived + crew_died
+
+prob_survived_passenger <- passengers_survived / total_passengers
+prob_survived_crew <- crew_survived / total_crew
+
+# Passengers' probability of surviving: 38%
+# Crew probability of surviving: 24%
+
+prob_survived_passenger
+prob_survived_crew
+
+# ANSWER
+titanic_probs <- titanic %>%
+  group_by(crew) %>%
+  summarise(prob = sum(survived == "yes") / n()) 
+
+titanic_probs
+```
+
+
+
+
+
+1.2 Probability Consolidation Questions
+
+Today was pretty full-on! Here are some problems to help you consolidate what you learned. Feel free to work on paper or in R, whichever you are most comfortable with:
+
+MVP - try four of the problems
+Extension - try more than four!
+
+
+Question 1.
+If I roll a six-sided dice once, what is the probability of getting a number less than 5?
+```{r}
+s <- rolldie(1) %>%
+  nrow()
+
+s_one_dice <- rolldie(1) %>% 
+  filter(X1 < 5) %>% 
+  summarise(count = n()) %>% 
+  pull()
+
+prob_less_than_5 <- s_one_dice / s
+
+prob_less_than_5
+```
+
+
+Question 2.
+How many outcomes are there in the sample space of an experiment in which we toss three dice?
+```{r}
+three_dice <- rolldie(3) %>% 
+  nrow()
+
+three_dice
+```
+
+
+Question 3.
+In an experiment where we roll four dice:
+
+    how many outcomes are in the event where the total of the four dice equals 5, 6 or 7?
+    what is the probability of this event?
+    what assumptions do we apply in answering part ii?
+
+Hint
+For part i, rowSums(.) may help you setup up the necessary random variable total (or you can use pivot_longer()) 
+
+```{r}
+#     how many outcomes are in the event where the total of the four dice equals 5, 6 or 7?
+four_dice_567 <- rolldie(4) %>% 
+  mutate(sum = rowSums(.)) %>% 
+  filter(sum == 5 | sum == 6 | sum == 7) %>% 
+  nrow()
+
+four_dice <- rolldie(4) %>% 
+  nrow()
+
+prob_four_dice_567 <- four_dice_567 / four_dice
+
+#     what is the probability of this event?
+prob_four_dice_567
+
+#    what assumptions do we apply in answering part ii?
+#    ???
+
+```
+
+
+
+Question 4.
+Five chairs are placed in a row in a room, along with five people of differing height. The people sit down randomly on the chairs. What is the probability that they sit in order of decreasing height, left to right?
+Hint
+This is an arrangement where order matters. Of all the possible arrangements, how many are correct?
+
+```{r}
+
+heights <- c(1.6, 1.7, 1.8, 1.9, 2)
+
+chairs <- as_tibble(
+  permutations(
+    n = 5,
+    r = 5,
+    v = heights
+  )
+)
+
+decr_height <- chairs %>% 
+  filter(V1 == 2 & V2 == 1.9 & V3 == 1.8 & V4 == 1.7) %>% 
+  nrow()
+
+prob_order_decr_height <- decr_height / nrow(chairs)
+prob_order_decr_height
+
+
+```
+
+
+Question 5.
+I roll six dice:
+
+    what is the probability I see the numbers 6, 5, 4, 3, 2 and 1 in order on the dice, left to right?
+    what is the probability I see one each of the numbers 6, 5, 4, 3, 2 and 1 on the dice regardless of order?
+
+Hint
+Have a look at the function in the package. For example, to all rows containing , , in that order, you could use
+
+```{r}
+options(scipen=999)
+roll_order <- rolldie(6) %>% 
+  filter(X1 == 6 & X2 == 5 & X3 == 4 & X4 == 3 & X5 == 2 & X6 == 1) %>% 
+  nrow()
+
+#     what is the probability I see the numbers 6, 5, 4, 3, 2 and 1 in order on the dice, left to right?
+prob_roll_order_six_one <- roll_order / nrow(rolldie(6))
+prob_roll_order_six_one
+
+#    what is the probability I see one each of the numbers 6, 5, 4, 3, 2 and 1 on the dice regardless of order?
+roll_no_order <- rolldie(6) %>% 
+  mutate(sum = rowSums(.)) %>% 
+  filter(sum == sum(1:6)) %>% 
+  nrow()
+
+prob_roll_no_order_six_one <- roll_no_order / nrow(rolldie(6))
+prob_roll_no_order_six_one
+
+# ANSWER
+
+contains_654321 <- six_rolls %>%
+  filter(isin(., c(6, 5, 4, 3, 2, 1), ordered = FALSE))
+
+prob <- nrow(contains_654321) / nrow(six_rolls)
+prob
+
+
+```
+
+
+Question 6.
+If I draw a single card from a 52-card deck, and it is black, what is the probability that its suit is spades?
+Hints
+
+```{r}
+black <- cards(jokers = FALSE) %>% 
+  filter(suit == "Club" | suit == "Spade") %>%
+  nrow()
+
+spades <- cards(jokers = FALSE) %>% 
+  filter(suit == "Spade") %>% 
+  nrow()
+
+prob_spade <- spades / black
+prob_spade
+  
+```
+
+
+2 Extension
+
+Answer more than 4 consolidation questions
