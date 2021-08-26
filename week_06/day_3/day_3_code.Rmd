@@ -1,0 +1,106 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+1 MVP
+
+Now we’ll go back to CI creation in the normal fashion. We’ll take the ames data from the CIs lab earlier today and regard it now as a sample, we won’t be drawing any smaller samples from within it. This is the usual situation in an analysis: you use all the data available to you!
+
+Task 1.
+Load the data again, clean_names(), and re-familiarise yourself with it
+
+```{r}
+library(janitor)
+library(tidyverse)
+library(infer)
+
+ames <- read_csv("data/ames.csv") %>% 
+  clean_names()
+```
+
+Task 2.
+Investigate the distribution of lot_area. Is the distribution roughly normal? If not, what problems do you find?
+```{r}
+
+lot_area_histo <- ames %>% 
+  ggplot(aes(x = lot_area)) +
+  geom_histogram(col = "white") +
+  xlim(0, 50000)
+
+lot_area_box <- ames %>% 
+  ggplot(aes(x = lot_area)) +
+  geom_boxplot()
+
+library(e1071)
+
+ames %>%
+  summarise(skewness = skewness(lot_area, type = 1))
+
+# Distribution is quite normal below 30,000 but highly right-skewed due to
+# outliers.
+```
+
+Task 3.
+Compute and visualise a bootstrap sampling distribution for the mean(lot_area) of the sold houses.
+```{r}
+
+bootstrap_sample <- ames %>% 
+  rep_sample_n(size = 200, replace = TRUE, reps = 5000) %>% 
+  summarise(mean_lot_area = mean(lot_area))
+
+bootstrap_sample_plot <- bootstrap_sample %>% 
+  ggplot(aes(x = mean_lot_area)) +
+  geom_histogram(col = "white")
+
+infer_bootstrap_sample <- ames %>% 
+  specify(response = lot_area) %>% 
+  generate(reps = 5000, type = "bootstrap") %>% 
+  calculate(stat = "mean")
+
+```
+
+Task 4.
+Use your bootstrap distribution to calculate a 95% CI for mean(lot_area), and visualise it on the distribution
+
+```{r}
+ci_95 <- infer_bootstrap_sample %>% 
+    get_ci(level = 0.95, type = "percentile")
+
+ci_95
+
+#     mean lower_bound upper_bound
+# 1 10154.       9280.      11454.
+
+infer_bootstrap_sample %>% 
+  visualise(method = "simulation") +
+  shade_ci(endpoints = ci_95)
+```
+
+Task 5.
+You would like to know the mean(lot_area) of the sold houses with higher confidence. Calculate the 99% CI for this variable (you can re-use your bootstrap distribution from above). Is it narrower or broader than the 95% CI? Does that make sense?
+
+```{r}
+ci_99 <- infer_bootstrap_sample %>% 
+  get_ci(level = 0.99, type = "percentile")
+
+infer_bootstrap_sample %>% 
+  visualise(method = "simulation") +
+  shade_ci(endpoints = ci_99)
+
+# Broader distribution than the 95% CI, which is expected.
+```
+
+Task 6.
+Calculate the point estimate of the mean(lot_area)
+```{r}
+summary_infer_bootstrap_sample <- infer_bootstrap_sample %>% 
+  ungroup() %>% 
+  summarise(
+    mean_lot_area = mean(stat)
+  )
+
+summary_infer_bootstrap_sample
+```
+
