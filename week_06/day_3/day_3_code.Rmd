@@ -50,7 +50,7 @@ bootstrap_sample <- ames %>%
   rep_sample_n(size = 200, replace = TRUE, reps = 5000) %>% 
   summarise(mean_lot_area = mean(lot_area))
 
-bootstrap_sample_plot <- bootstrap_sample %>% 
+  bootstrap_sample_plot <- bootstrap_sample %>% 
   ggplot(aes(x = mean_lot_area)) +
   geom_histogram(col = "white")
 
@@ -119,6 +119,8 @@ built before 1920. Does the number of reps you use matter?
 
 [Investigate reps from 200 up to 50000, memory of your laptop permitting]. 
 ```{r}
+ames_1920 <- ames %>% 
+  filter(year_built < 1920)
 
 infer_bootstrap_sample_1920_200 <- ames %>% 
   filter(year_built < 1920) %>% 
@@ -161,13 +163,13 @@ summary_infer_bootstrap_sample_1920_5000 <- infer_bootstrap_sample_1920_5000 %>%
   )
 
 #   mean_lot_area
-# 1         9858.
+# 1         9850.
 
 ci_95_1920_5000 <- infer_bootstrap_sample_1920_5000 %>% 
   get_ci(level = 0.95, type = "percentile")
 
 #   lower_ci upper_ci
-# 1    9136.   10850.
+# 1    9061.   10789.
 
 infer_bootstrap_sample_1920_5000 %>% 
   visualise(method = "simulation") +

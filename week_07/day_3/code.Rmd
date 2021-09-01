@@ -1,0 +1,73 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+```
+
+
+ggplot2 Practice Questions
+
+We’re going to use data on loans provided by LendingClub to practice ggplot2. This dataset contains information about real loans provided through an online lending platform.
+
+First, read the dataset loans.csv in.
+```{r}
+loans <- read_csv("data/loans.csv")
+```
+
+1
+For each of the questions below, create the plot using ggplot and write a sentence about what the plot shows.
+
+- Make a scatterplot with loan amount on the x-axis and interest rate, on the y-axis      again.
+- Add transparency of points to the plot you just created.
+- Edit the plot you created to colour the points by the grade of the loan.
+- Editing the current plot, use faceting to make a separate plot for each grade.
+
+```{r}
+loans %>% 
+  ggplot(aes(x = loan_amnt, y = int_rate, colour = grade))+
+  geom_point(alpha = 0.3, show.legend = FALSE)+
+  theme_minimal()+
+  facet_wrap(~grade)+
+  labs(
+    title = "\nInterest Rate against Loan Amount by Grade\n",
+    x = "\nLoan Amount (£)\n",
+    y = "\nInterest Rate\n"
+  )
+```
+The plot shows that interest rate increases from grade A to grade G, and that interest rate does not appear to be affected by loan amount.
+
+
+2
+
+Make a barplot where the height of the bars show the mean loan amount for each grade. Colour the bars by the mean interest rate in each grade.
+```{r}
+loans %>% 
+  group_by(grade) %>% 
+  summarise(mean_loan_amnt = mean(loan_amnt),
+            mean_interest_rate = mean(int_rate)) %>% 
+  ggplot(aes(x = grade, y = mean_loan_amnt, fill = mean_interest_rate))+
+  geom_bar(stat = "identity")
+```
+
+
+
+
+3
+
+Explore the data. Try to create one polished graph that summarises how purpose, loan amount, interest rate and grade are related. Is there one purpose that is significantly different from the others? How can you show this in your graph?
+
+```{r}
+loans_analysis <- loans %>% 
+  select(purpose, loan_amnt, int_rate, grade)
+
+loans_analysis %>% 
+  ggplot(aes(x = purpose, y = loan_amnt, fill = grade))+
+  geom_col(position = "stack")+
+  geom_line(int_rate)
+```
+
