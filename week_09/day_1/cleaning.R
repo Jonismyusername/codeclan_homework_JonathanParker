@@ -37,6 +37,67 @@ cancer_data_age_groups <- cancer_data_age_groups %>%
   select(cancer_site, sex, crude_rate, easr, wasr, hb_name, 
          age_group, incidence_rate, incidences_all_ages)
 
+cancer_top_ten <- cancer_data %>% 
+  filter(cancer_site != "All cancer types" 
+         & sex == "All"
+         & hb_name %in% southern_scotland
+         & year == "2019"
+  ) %>% 
+  group_by(cancer_site) %>% 
+  # mutate(total_incidences = sum(incidences_all_ages)) %>% 
+  # view()
+  summarise(total_incidences = sum(incidences_all_ages), hb_name) %>% 
+  arrange(desc(total_incidences)) %>% 
+  distinct(cancer_site) %>% 
+  head(10) %>% 
+  pull()
 
+cancer_top_ten_scotland <- cancer_data %>% 
+  filter(cancer_site != "All cancer types" 
+         & sex == "All"
+         # & hb_name %in% southern_scotland
+         & year == "2019"
+  ) %>% 
+  group_by(cancer_site) %>% 
+  # mutate(total_incidences = sum(incidences_all_ages)) %>% 
+  # view()
+  summarise(total_incidences = sum(incidences_all_ages), hb_name) %>% 
+  arrange(desc(total_incidences)) %>% 
+  distinct(cancer_site) %>% 
+  head(10) %>% 
+  pull()
+
+cancer_top_ten_female <- cancer_data %>% 
+  filter(cancer_site != "All cancer types" 
+         & sex == "Female"
+         & hb_name %in% southern_scotland
+         & year == "2019"
+  ) %>% 
+  group_by(cancer_site) %>% 
+  # mutate(total_incidences = sum(incidences_all_ages)) %>% 
+  # view()
+  summarise(total_incidences = sum(incidences_all_ages), hb_name) %>% 
+  arrange(desc(total_incidences)) %>% 
+  distinct(cancer_site) %>% 
+  head(10) %>% 
+  pull()
+
+cancer_top_ten_male <- cancer_data %>% 
+  filter(cancer_site != "All cancer types" 
+         & sex == "Male"
+         & hb_name %in% southern_scotland
+         & year == "2019"
+  ) %>% 
+  group_by(cancer_site) %>% 
+  # mutate(total_incidences = sum(incidences_all_ages)) %>% 
+  # view()
+  summarise(total_incidences = sum(incidences_all_ages), hb_name) %>% 
+  arrange(desc(total_incidences)) %>% 
+  distinct(cancer_site) %>% 
+  head(10) %>% 
+  pull()
+
+southern_scotland <- c("NHS Borders", "NHS Dumfries and Galloway", "NHS Ayrshire and Arran",
+                       "NHS Lanarkshire", "NHS Lothian", "NHS Greater Glasgow and Clyde")
 
   

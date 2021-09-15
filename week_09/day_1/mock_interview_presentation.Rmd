@@ -1,0 +1,247 @@
+---
+title: "Cancer rates in the Scottish Borders"
+author: "Jonathan Parker"
+date: "16/09/2021"
+output:
+  ioslides_presentation:
+        widescreen: true
+        css: styles.css
+---
+
+```{r setup, include=FALSE}
+# knitr::opts_chunk$set(echo = FALSE)
+
+knitr::opts_chunk$set(echo = FALSE,
+                          fig.align="center" #align all the figures in the center
+                          )
+
+```
+
+```{r, include=FALSE}
+library(tidyverse)
+library(janitor)
+
+# Read in cancer data and geographic codes and clean names using the Janitor library.
+cancer_data <- read_csv("data/cancer_data.csv") %>% 
+  clean_names()
+
+cancer_data_age_groups <- read_csv("data/cancer_data_2015_2019.csv") %>% 
+  clean_names()
+
+hb_codes <- read_csv("data/geography_codes_and_labels_hb2014_01042019.csv") %>% 
+  clean_names()
+
+# Join cancer data to codes and select relevant variables
+cancer_data <- cancer_data %>% 
+  left_join(hb_codes, by = "hb") %>% 
+  select(hb, hb_name, cancer_site, sex, year, incidences_all_ages, crude_rate, easr, wasr)
+
+# Repeat for cancer data with age groups
+cancer_data_age_groups <- cancer_data_age_groups %>% 
+  left_join(hb_codes, by = "hb") %>% 
+# Pivot longer on columns for incidence rates to enable analysis of age groups
+  pivot_longer(
+    cols = contains("incidence_rate_"),
+    names_to = "age_group",
+    values_to = "incidence_rate"
+  ) %>%
+# Tidying up new age group column to make more legible  
+  mutate(age_group = str_sub(age_group, start = 19),
+         age_group = str_replace(age_group, "to", " - "),
+         age_group = recode(age_group,
+                            "_under5" = "0 - 4",
+                            "5 - 9" = "05 - 09",
+                            "85and_over" = "85+"
+         )) %>% 
+# Selecting relevant variables 
+  select(cancer_site, sex, crude_rate, easr, wasr, hb_name, 
+         age_group, incidence_rate, incidences_all_ages)
+
+southern_scotland <- c("NHS Borders", "NHS Dumfries and Galloway", "NHS Ayrshire and Arran",
+                       "NHS Lanarkshire", "NHS Lothian", "NHS Greater Glasgow and Clyde")
+
+cancer_top_ten <- cancer_data %>% 
+  filter(cancer_site != "All cancer types" 
+         & sex == "All"
+         & hb_name %in% c("NHS Borders", "NHS Dumfries and Galloway", "NHS Ayrshire and Arran",
+                   "NHS Lanarkshire", "NHS Lothian", "NHS Greater Glasgow and Clyde")
+         & year == "2019"
+  ) %>% 
+  group_by(cancer_site) %>% 
+  # mutate(total_incidences = sum(incidences_all_ages)) %>% 
+  # view()
+  summarise(total_incidences = sum(incidences_all_ages), hb_name) %>% 
+  arrange(desc(total_incidences)) %>% 
+  distinct(cancer_site) %>% 
+  head(10) %>% 
+  pull()
+
+cancer_top_ten_scotland <- cancer_data %>% 
+  filter(cancer_site != "All cancer types" 
+         & sex == "All"
+         # & hb_name %in% southern_scotland
+         & year == "2019"
+  ) %>% 
+  group_by(cancer_site) %>% 
+  # mutate(total_incidences = sum(incidences_all_ages)) %>% 
+  # view()
+  summarise(total_incidences = sum(incidences_all_ages), hb_name) %>% 
+  arrange(desc(total_incidences)) %>% 
+  distinct(cancer_site) %>% 
+  head(10) %>% 
+  pull()
+
+cancer_top_ten_female <- cancer_data %>% 
+  filter(cancer_site != "All cancer types" 
+         & sex == "Female"
+         & hb_name %in% c("NHS Borders", "NHS Dumfries and Galloway", "NHS Ayrshire and Arran",
+                   "NHS Lanarkshire", "NHS Lothian", "NHS Greater Glasgow and Clyde")
+         & year == "2019"
+  ) %>% 
+  group_by(cancer_site) %>% 
+  # mutate(total_incidences = sum(incidences_all_ages)) %>% 
+  # view()
+  summarise(total_incidences = sum(incidences_all_ages), hb_name) %>% 
+  arrange(desc(total_incidences)) %>% 
+  distinct(cancer_site) %>% 
+  head(10) %>% 
+  pull()
+
+cancer_top_ten_male <- cancer_data %>% 
+  filter(cancer_site != "All cancer types" 
+         & sex == "Male"
+         & hb_name %in% c("NHS Borders", "NHS Dumfries and Galloway", "NHS Ayrshire and Arran",
+                   "NHS Lanarkshire", "NHS Lothian", "NHS Greater Glasgow and Clyde")
+         & year == "2019"
+  ) %>% 
+  group_by(cancer_site) %>% 
+  # mutate(total_incidences = sum(incidences_all_ages)) %>% 
+  # view()
+  summarise(total_incidences = sum(incidences_all_ages), hb_name) %>% 
+  arrange(desc(total_incidences)) %>% 
+  distinct(cancer_site) %>% 
+  head(10) %>% 
+  pull()
+
+```
+
+## Introduction
+
+"In order to help inform the planning for provision of cancer treatment 
+services in NHS Borders, we would like to gain better understanding of the 
+incidence of cancer in NHS Borders."
+
+
+- Annual cancer incidence by health board
+
+- Crude rate is calculated as follows:
+
+$$
+\text{Crude Rate} = \frac{\text{New Cancer Cases}}{\text{At Risk Population}} * 100,000
+$$
+
+## Cancer rate over time in Southern Scotland
+```{r, fig.width=9,fig.height=5, warning=FALSE}
+# Cancer rate over time in Southern Scotland (all cancer types)
+cancer_data %>% 
+  filter(
+    sex == "All" &
+    cancer_site == "All cancer types" &
+    hb_name %in% southern_scotland
+         ) %>% 
+  group_by(hb_name) %>% 
+  ggplot(aes(x = year, y = crude_rate, group = hb_name, colour = hb_name))+
+  geom_point()+
+  geom_line()+
+  labs(
+    title = "Crude cancer rate over time in Southern Scotland",
+    subtitle = "All cancer types",
+    x = "\nYear",
+    y = "Crude rate\n",
+    colour = "Health Board"
+  )
+```
+
+
+## Top ten cancer types for women, NHS Borders
+```{r, fig.width=9,fig.height=5, warning=FALSE}
+# Changes in top ten cancer types for women over time in NHS Borders only
+cancer_data %>% 
+  filter(cancer_site %in% cancer_top_ten_female &
+           hb_name == "NHS Borders" &
+           sex == "Female") %>% 
+  group_by(cancer_site, year) %>% 
+  summarise(crude_rate) %>% 
+  arrange(desc(crude_rate)) %>%
+  ggplot(aes(x = year, y = crude_rate, group = cancer_site, colour = cancer_site))+
+  geom_point()+
+  geom_line()+
+    labs(
+    title = "Changes in top ten cancer types among women over time",
+    subtitle = "NHS Borders",
+    x = "\nYear",
+    y = "Crude rate\n",
+    colour = "Type of cancer\n"
+  )
+```
+
+## Top ten cancer types for men, NHS Borders
+```{r, fig.width=9,fig.height=5, warning=FALSE}
+cancer_data %>% 
+  filter(cancer_site %in% cancer_top_ten_male &
+           hb_name == "NHS Borders" &
+           sex == "Male") %>% 
+  group_by(cancer_site, year) %>% 
+  # summarise(avg_rate = mean(crude_rate)) %>% 
+  summarise(crude_rate) %>% 
+  arrange(desc(crude_rate)) %>%
+  ggplot(aes(x = year, y = crude_rate, group = cancer_site, colour = cancer_site))+
+  geom_point()+
+  geom_line() +
+  labs(
+    title = "Changes in top ten cancer types among men over time",
+    subtitle = "NHS Borders",
+    x = "\nYear",
+    y = "Crude rate\n",
+    colour = "Type of cancer\n"
+  )
+```
+
+## Rural vs Urban
+```{r, fig.width=9,fig.height=5, warning=FALSE}
+cancer_data %>% 
+  filter(
+    hb_name %in% c("NHS Borders", "NHS Dumfries and Galloway", "NHS Lothian", "NHS Greater Glasgow and Clyde")
+    & sex == "All"
+    & cancer_site %in% cancer_top_ten_scotland
+    & year == "2019"
+  ) %>% 
+  group_by(hb_name, cancer_site) %>% 
+  summarise(crude_rate) %>% 
+  ggplot(aes(x = reorder(cancer_site, crude_rate), y = crude_rate, group = hb_name, fill = hb_name
+             ))+
+  geom_bar(position = "dodge", stat = "identity")+
+  theme(axis.text.x = element_text(angle = 50, vjust = 1, hjust = 1))+
+  labs(
+    title = "Crude rate of top ten cancer types by zone",
+    subtitle = "2019 data for Borders, Dumfries & Galloway, Lothians and Greater Glasgow and Clyde",
+    x = "\nType of cancer\n",
+    y = "Crude rate\n",
+    fill = "Health Board"
+    )
+```
+
+## Key findings
+
+1. Increase in cancer rate is likely due to increasing size of older population
+
+2. Higher rate in rural areas can also be explained differing population demographics
+
+3. Skin cancers seem to have the highest rates among both men and women in NHS Borders
+
+### Recommendation
+
+- Focus more efforts on identification and treatment of skin cancers
+
+
+
