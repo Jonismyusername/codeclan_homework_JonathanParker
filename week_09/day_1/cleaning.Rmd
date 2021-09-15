@@ -1,0 +1,83 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+```{r}
+library(tidyverse)
+library(janitor)
+```
+
+
+Technical Question Example - Cancer Rates in the Borders
+
+Question:
+
+Please prepare a 1 to 2 page analysis summary answering the question below.
+
+In order to help inform the planning for provision of cancer treatment services in NHS Borders, we would like to gain better understanding of the incidence of cancer in NHS Borders.
+
+You will present your findings back to us during the Mock Interviews. Presentations will be 5 minutes long.
+
+```{r}
+cancer_data_test <- read_csv("cancer_data_2015_2019.csv") %>% 
+  clean_names()
+
+hb_codes <- read_csv("geography_codes_and_labels_hb2014_01042019.csv") %>% 
+  clean_names()
+```
+```{r}
+# Join cancer data to health board codes
+cancer_data_test_clean <- cancer_data_test %>% 
+  left_join(hb_codes, by = "hb") %>% 
+  # pivot_longer(
+  #   cols = starts_with("incidences"),
+  #   names_to = "age_group",
+  #   values_to = "incidences"
+  # ) %>% 
+  # mutate(age_group = str_sub(age_group, start = 12)) %>% 
+  
+# Pivot longer to create age group and incidence rate variables  
+  pivot_longer(
+    cols = starts_with("incidence_rate"),
+    names_to = "age_group",
+    values_to = "incidence_rate"
+  ) %>%
+# Tidying up new age group column to make more legible  
+  mutate(age_group = str_sub(age_group, start = 19),
+         age_group = str_replace(age_group, "to", " - "),
+         age_group = recode(age_group,
+           "_under5" = "0 - 5",
+           "85and_over" = "85+"
+         )) %>% 
+  select(cancer_site, sex, crude_rate, easr, wasr, hb_name, age_group, incidence_rate)
+  
+```
+
+```{r}
+str(cancer_data_clean)
+```
+
+Incidence rate incorporates time directly into the denominator and can be calculated as follows:
+
+Number of new cases during a specified time period / person years at risk during the same time period
+
+Person years at risk means the total amount of time (in years) that each person of the study population is at risk of the disease during the period of interest.
+
+```{r}
+cancer_data_clean %>% 
+  filter(sex == "All" &
+           cancer_site == "All cancer types" &
+           hb_name == "NHS Borders") %>% 
+  group_by(age_group) %>% 
+  summarise(incidence_rate) %>% 
+  ggplot(aes(x = reorder(age_group, incidence_rate), y = incidence_rate))+
+  geom_col()
+```
+
+```{r}
+cancer_data %>% 
+  distinct(year)
+```
+
