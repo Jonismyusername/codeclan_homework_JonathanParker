@@ -141,7 +141,7 @@ $$
 $$
 
 ## Cancer rate over time in Southern Scotland
-```{r, fig.width=9,fig.height=5, warning=FALSE}
+```{r, fig.width=9,fig.height=5, warning=FALSE, message=FALSE}
 # Cancer rate over time in Southern Scotland (all cancer types)
 cancer_data %>% 
   filter(
@@ -164,7 +164,7 @@ cancer_data %>%
 
 
 ## Top ten cancer types for women, NHS Borders
-```{r, fig.width=9,fig.height=5, warning=FALSE}
+```{r, fig.width=9,fig.height=5, warning=FALSE, message=FALSE}
 # Changes in top ten cancer types for women over time in NHS Borders only
 cancer_data %>% 
   filter(cancer_site %in% cancer_top_ten_female &
@@ -186,7 +186,7 @@ cancer_data %>%
 ```
 
 ## Top ten cancer types for men, NHS Borders
-```{r, fig.width=9,fig.height=5, warning=FALSE}
+```{r, fig.width=9,fig.height=5, warning=FALSE, message=FALSE}
 cancer_data %>% 
   filter(cancer_site %in% cancer_top_ten_male &
            hb_name == "NHS Borders" &
@@ -208,7 +208,7 @@ cancer_data %>%
 ```
 
 ## Rural vs Urban
-```{r, fig.width=9,fig.height=5, warning=FALSE}
+```{r, fig.width=9,fig.height=5, warning=FALSE, message=FALSE}
 cancer_data %>% 
   filter(
     hb_name %in% c("NHS Borders", "NHS Dumfries and Galloway", "NHS Lothian", "NHS Greater Glasgow and Clyde")
@@ -235,13 +235,16 @@ cancer_data %>%
 
 1. Increase in cancer rate is likely due to increasing size of older population
 
-2. Higher rate in rural areas can also be explained differing population demographics
+2. Higher rate in rural areas can also be explained by differing population demographics
 
-3. Skin cancers seem to have the highest rates among both men and women in NHS Borders
+3. Skin cancers seem to have the highest rates among both men and women in NHS Borders and are increasing at a faster rate than other types
+
+4. Breast cancer and prostate cancer rates remain high for women and men respectively
 
 ### Recommendation
 
 - Focus more efforts on identification and treatment of skin cancers
+- Consider more regular screenings for breast and prostate cancers to catch them earlier
 
-
+# Questions
 
