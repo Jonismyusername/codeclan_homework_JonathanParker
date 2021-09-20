@@ -97,7 +97,7 @@ cancer_top_ten_male <- cancer_data %>%
   head(10) %>% 
   pull()
 
-southern_scotland <- c("NHS Borders", "NHS Dumfries and Galloway", "NHS Ayrshire and Arran",
-                       "NHS Lanarkshire", "NHS Lothian", "NHS Greater Glasgow and Clyde")
+# southern_scotland <- c("NHS Borders", "NHS Dumfries and Galloway", "NHS Ayrshire and Arran",
+#                        "NHS Lanarkshire", "NHS Lothian", "NHS Greater Glasgow and Clyde")
 
   

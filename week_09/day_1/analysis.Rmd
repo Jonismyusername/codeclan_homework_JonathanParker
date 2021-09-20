@@ -36,6 +36,10 @@ cancer_data_age_groups %>%
   geom_col()
 ```
 
+$$
+\text{Crude Rate} = \frac{\text{New Cancer Cases}}{\text{At Risk Population}} * 100,000
+$$
+
 ```{r}
 # Cancer rate over time in Southern Scotland (all cancer types)
 cancer_data %>% 
@@ -43,18 +47,25 @@ cancer_data %>%
     sex == "All" &
     cancer_site == "All cancer types" &
            # & year == "2019"
-    hb_name %in% c("NHS Borders", "NHS Dumfries and Galloway", "NHS Ayrshire and Arran",
-                   "NHS Lanarkshire", "NHS Lothian")
+    hb_name %in% southern_scotland
          ) %>% 
   group_by(hb_name) %>% 
   ggplot(aes(x = year, y = crude_rate, group = hb_name, colour = hb_name))+
   geom_point()+
-  geom_line()
+  geom_line()+
+  labs(
+    title = "Crude cancer rate over time in Southern Scotland",
+    subtitle = "All cancer types",
+    x = "\nYear",
+    y = "Crude rate\n",
+    colour = "Health Board"
+  )
 ```
 Analysis
 
 General upward trend over time among all zones on chart.
 Possible explanations for this could be:
+- increasing size of older population 
 - better diagnosis of cancer leading to higher numbers of incidences (useful to
 compare to successful treatment rates / life expectancy of cancer patients to see
 if these also increase during the time frame)
@@ -134,7 +145,7 @@ cancer_top_ten_male <- cancer_data %>%
   pull()
 
 southern_scotland <- c("NHS Borders", "NHS Dumfries and Galloway", "NHS Ayrshire and Arran",
-                   "NHS Lanarkshire", "NHS Lothian")
+                   "NHS Lanarkshire", "NHS Lothian", "NHS Greater Glasgow and Clyde")
 
 # Average rate for top ten cancer types (Southern Scotland)
 cancer_data %>% 
@@ -181,7 +192,7 @@ cancer_data %>%
     subtitle = "NHS Borders",
     x = "\nYear",
     y = "Crude rate\n",
-    colour = "Type of cancer"
+    colour = "Type of cancer\n"
   )
 ```
 ```{r}
@@ -202,7 +213,7 @@ cancer_data %>%
     subtitle = "NHS Borders",
     x = "\nYear",
     y = "Crude rate\n",
-    colour = "Type of cancer"
+    colour = "Type of cancer\n"
   )
 ```
 
@@ -257,9 +268,9 @@ cancer_data %>%
   labs(
     title = "Crude rate of top ten cancer types by zone",
     subtitle = "2019 data for Borders, Dumfries & Galloway, Lothians and Greater Glasgow and Clyde",
-    x = "Crude rate\n",
-    y = "\nType of cancer\n",
-    fill = "Health Board Name"
+    x = "\nType of cancer\n",
+    y = "Crude rate\n",
+    fill = "Health Board"
     )
 
   
