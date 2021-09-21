@@ -60,11 +60,14 @@ project %>%
 ```{r}
 summary(model)
 ```
+A 1 day increase in estimated_length is associated with a 1.2235 day increase in actual_length, i.e. the company is underestimating job lengths.
+
+64.7% of the variation in actual_length in the sample data can be explained by variation in estimated_length.
+
 ```{r}
 glance(model)
 ```
 
-64.7% of the variation in actual_length in the sample data can be explained by variation in estimated_length.
 
 
 # Is the relationship statistically significant? Remember, to assess this you need to check the p-value of the regression coefficient (or slope/gradient). But you should first check the regression diagnostic plots to see if the p-value will be reliable (don’t worry about any outlier points you see in the diagnostic plots, we’ll return to them in the extension).
