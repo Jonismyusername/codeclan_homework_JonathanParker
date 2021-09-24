@@ -46,20 +46,20 @@ ggpairs(diamonds_trim)
 
 ```{r}
 diamonds_trim %>% 
-  ggplot(aes(x = price, y = carat))+
+  ggplot(aes(x = carat, y = price))+
   geom_point()+
   geom_smooth(method = "lm", se = FALSE)
 ```
 
 ```{r}
 diamonds_trim %>% 
-  ggplot(aes(x = price, y = cut))+
+  ggplot(aes(x = cut, y = price))+
   geom_boxplot()
 ```
 
 ```{r}
 diamonds_trim %>% 
-  ggplot(aes(x = price, y = clarity))+
+  ggplot(aes(x = clarity, y = price))+
   geom_boxplot()
 ```
 
@@ -103,4 +103,3 @@ autoplot(model2)
 ```{r}
 summary(model2)
 ```
-
