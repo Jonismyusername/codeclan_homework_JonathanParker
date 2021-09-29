@@ -1,0 +1,107 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r}
+library(rpart)
+library(rpart.plot)
+library(tidyverse)
+
+library(tidyverse)
+titanic_set <- read_csv('data/titanic_decision_tree_data.csv')
+
+shuffle_index <- sample(1:nrow(titanic_set))
+
+# shuffle the data so class order isn't in order - need this for training/testing split later on 
+titanic_set <- titanic_set[shuffle_index, ]
+```
+
+1 MVP
+1.1 Question 1
+
+
+Cleaning up the data is always the first step. Do the following:
+
+    Take only observations which have a survived flag (i.e. that aren’t missing)
+    Turn your important variables into factors (sex, survived, pclass, embarkation)
+    Create an age_status variable which groups individuals under (and including) 16 years of age into a category called “child” category and those over 16 into a category called “adult”.
+    Drop the NA
+    Drop any variables you don’t need (X1, passenger_id, name, ticket, far, cabin)
+
+If you need help doing this, the code is below, but please try it yourself first so you can learn!
+
+```{r}
+titanic_clean <- titanic_set %>% 
+  filter(!is.na(survived)) %>% 
+  mutate(across(c(sex, survived, pclass, embarked), as.factor),
+         age_status = if_else(age <= 16, "Child", "Adult")) %>% 
+  drop_na() %>% 
+  select(-c(X1, passenger_id, name, ticket, fare, cabin))
+
+```
+
+
+1.2 Question 2
+
+ Have a look at your data and create some plots to ensure you know what you’re working with before you begin. Write a summary of what you have found in your plots. Which variables do you think might be useful to predict whether or not people are going to die? Knowing this before you start is the best way to have a sanity check that your model is doing a good job.
+ 
+```{r}
+library(GGally)
+
+ggpairs(titanic_clean)
+```
+ 
+
+
+1.3 Question 3
+
+Now you can start to build your model. Create your testing and training set using an appropriate split. 
+
+Check you have balanced sets. Write down why you chose the split you did and produce output tables to show whether or not it is balanced. [Extra - if you want to force balanced testing and training sets, have a look at the stratified() function in package splitstackshape (you can specify multiple variables to stratify on by passing a vector of variable names to the group argument, and get back testing and training sets with argument bothSets = TRUE)]
+
+```{r}
+# create a test sample index
+
+n_data <- nrow(titanic_clean)
+
+test_index <- sample(1:n_data, size = n_data * 0.2)
+
+titanic_test <- slice(titanic_clean, test_index)
+
+titanic_train <- slice(titanic_clean, -test_index)
+```
+```{r}
+titanic_test %>% 
+  janitor::tabyl(survived)
+```
+```{r}
+titanic_train %>% 
+  janitor::tabyl(survived)
+```
+
+1.4 Question 4
+
+Create your decision tree to try and predict survival probability using an appropriate method, and create a decision tree plot.
+
+```{r}
+titanic_fit <- rpart(
+  formula = survived ~ .,
+  data = titanic_train,
+  method = "class"
+)
+```
+```{r}
+rpart.plot(titanic_fit,
+           # writes yes and no at all splits
+           yesno = 2,
+           # leaves to be at the bottom of decision tree
+           fallen.leaves = TRUE,
+           # defines length of factor level names in split
+           faclen = 6,
+           # number of significant digits
+           digit = 4)
+```
+
