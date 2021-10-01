@@ -34,12 +34,23 @@ Cleaning up the data is always the first step. Do the following:
 If you need help doing this, the code is below, but please try it yourself first so you can learn!
 
 ```{r}
-titanic_clean <- titanic_set %>% 
-  filter(!is.na(survived)) %>% 
-  mutate(across(c(sex, survived, pclass, embarked), as.factor),
-         age_status = if_else(age <= 16, "Child", "Adult")) %>% 
-  drop_na() %>% 
-  select(-c(X1, passenger_id, name, ticket, fare, cabin))
+# titanic_clean <- titanic_set %>% 
+#   filter(!is.na(survived)) %>% 
+#   mutate(across(c(sex, survived, pclass, embarked), as.factor),
+#          age_status = if_else(age <= 16, "Child", "Adult")) %>% 
+#   drop_na() %>% 
+#   select(-c(X1, passenger_id, name, ticket, fare, cabin))
+
+titanic_clean <- titanic_set %>%
+  filter(survived %in% c(0,1)) %>%
+# Convert to factor level
+    mutate(sex = as.factor(sex), 
+           age_status = as.factor(if_else(age <= 16, "child", "adult")),
+         class = factor(pclass, levels = c(3,2,1), labels = c("Lower", "Middle", "Upper")), 
+           survived_flag = factor(survived, levels = c(0,1), labels = c("No", "Yes")), 
+           port_embarkation = as.factor(embarked)) %>%
+  select(sex, age_status, class, port_embarkation, sib_sp, parch, survived_flag) %>%
+  na.omit()
 
 ```
 
@@ -75,11 +86,11 @@ titanic_train <- slice(titanic_clean, -test_index)
 ```
 ```{r}
 titanic_test %>% 
-  janitor::tabyl(survived)
+  janitor::tabyl(survived_flag)
 ```
 ```{r}
 titanic_train %>% 
-  janitor::tabyl(survived)
+  janitor::tabyl(survived_flag)
 ```
 
 1.4 Question 4
@@ -88,7 +99,7 @@ Create your decision tree to try and predict survival probability using an appro
 
 ```{r}
 titanic_fit <- rpart(
-  formula = survived ~ .,
+  formula = survived_flag ~ .,
   data = titanic_train,
   method = "class"
 )
